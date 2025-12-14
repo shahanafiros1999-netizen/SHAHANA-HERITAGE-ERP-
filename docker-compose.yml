@@ -1,0 +1,27 @@
+
+version: '3.8'
+
+services:
+  # Python Flask Backend
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+    volumes:
+      - ./backend:/app
+
+  # React Frontend (Vite Dev Server)
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
