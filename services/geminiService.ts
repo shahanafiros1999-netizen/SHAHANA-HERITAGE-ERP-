@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MOCK_ASSETS, GOVERNANCE_RULES, FINANCIAL_HISTORY } from "../constants";
 
 const getSystemInstruction = () => {
@@ -25,24 +25,37 @@ const getSystemInstruction = () => {
 
 export const generateAdvisorResponse = async (userPrompt: string): Promise<string> => {
   try {
-    const apiKey = process.env.API_KEY;
-    
+    const apiKey = import.meta.env.VITE_API_KEY;
+
     if (!apiKey) {
-        return "System Notification: API Key is missing. Please configure process.env.API_KEY.";
+      return "System Notification: API Key is missing. Please configure VITE_API_KEY in your environment.";
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-    
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: userPrompt,
-      config: {
-        systemInstruction: getSystemInstruction(),
-        temperature: 0.7, // Balanced creativity and precision
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const response = await model.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [ { text: userPrompt } ]
+        }
+      ],
+      systemInstruction: getSystemInstruction(),
+      generationConfig: {
+        temperature: 0.7
       }
     });
 
-    return response.text || "I was unable to generate a strategic response at this time.";
+    // `generateContent` returns a GenerateContentResult; the helper `response.response.text()`
+    // is defined in the SDK typings as an accessor. Use it when available, otherwise fallback.
+    try {
+      // @ts-ignore -- use SDK helper if present
+      return (response.response as any).text?.() || (response.response?.candidates?.[0]?.parts?.map(p => (p as any).text).join('') ?? "I was unable to generate a strategic response at this time.");
+    } catch {
+      return "I was unable to generate a strategic response at this time.";
+    }
   } catch (error) {
     console.error("Gemini API Error:", error);
     return "Advisory System Offline. Please check connectivity or API configuration.";

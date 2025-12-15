@@ -5,7 +5,7 @@ import {
   Landmark, 
   Scale, 
   Users, 
-  Vault, 
+  Archive, 
   Bot, 
   LogOut,
   Menu,
@@ -36,7 +36,7 @@ const Layout: React.FC<LayoutProps> = ({
     { type: ModuleType.FINANCE, label: 'Finance & Budget', icon: Landmark },
     { type: ModuleType.GOVERNANCE, label: 'Constitution', icon: Scale },
     { type: ModuleType.HR, label: 'Family HR', icon: Users },
-    { type: ModuleType.VAULT, label: 'Heritage Vault', icon: Vault },
+    { type: ModuleType.VAULT, label: 'Heritage Vault', icon: Archive },
     { type: ModuleType.ADVISOR, label: 'AI Advisor', icon: Bot },
   ];
 
